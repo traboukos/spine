@@ -14,6 +14,36 @@
   var makeArray = Spine.makeArray = function(args){
     return Array.prototype.slice.call(args, 0);
   };
+
+  var punch = Spine.punch = function (obj, method, fn, auto){
+    var old = obj[method]
+    obj[method] = auto ? function (){
+      old.apply(obj, arguments)
+      return fn.apply(obj, arguments)
+    } : function (){
+      var args = [].slice.call(arguments, 0)
+      args.unshift(function (){
+        return old.apply(obj, arguments)
+      })
+      return fn.apply(obj, args)
+    }
+  };
+
+  var mixin = Spine.mixin = function (obj, ext){
+    for (i in ext) {
+      if (!ext.hasOwnProperty(i))
+        continue
+
+      if (!obj[i] || typeof ext[i] != 'function'){
+        obj[i] = ext[i]
+        continue
+      }
+
+      punch(obj, i, ext[i],true)
+    }
+
+    return obj;
+  };
   
   // Shim Array, as these functions aren't in IE
   if (typeof Array.prototype.indexOf === "undefined")
@@ -163,7 +193,17 @@
       var extended = obj.extended;
       if (extended) extended.apply(this);
       return this;
-    }
+    },
+
+    mixin: function(include,extend){
+      if(include)
+        mixin(this.fn , include);
+
+      if(extend)
+        mixin(this , extend);
+                  
+      return this;
+    },
   };
   
   Class.prototype.proxy    = Class.proxy;

@@ -47,6 +47,50 @@ describe("Class", function(){
     expect(User.prototype.instanceProperty).toBeTruthy();
     expect(User.init().instanceProperty).toBeTruthy();
   });
+
+  it("can be mixinable", function(){
+    User.include({
+      instanceProperty1: false,
+      instanceProperty2: false,
+      changeInstanceProperty: function(){
+        this.instanceProperty1 = true;
+      }
+    });
+
+    User.extend({
+      classProperty1: false,
+      classProperty2: false,
+      changeClassProperty: function(){
+        this.classProperty1 = true;
+      }
+    });
+
+    User.extend
+
+    var instanceMixin = {
+      changeInstanceProperty: function(){
+        this.instanceProperty2 = true;
+      }
+    };
+
+    var classMixin = {
+      changeClassProperty: function(){
+        this.classProperty2 = true;
+      }
+    }
+
+    User.mixin(instanceMixin,classMixin);
+
+    var user = User.init();
+    user.changeInstanceProperty();
+    User.changeClassProperty();
+
+    expect(user.instanceProperty1).toBeTruthy();
+    expect(user.instanceProperty2).toBeTruthy();
+
+    expect(User.classProperty1).toBeTruthy();
+    expect(User.classProperty2).toBeTruthy();    
+  });
   
   it("should trigger module callbacks", function(){
     var module = {
